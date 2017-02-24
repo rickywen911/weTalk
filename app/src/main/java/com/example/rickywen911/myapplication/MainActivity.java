@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private Button stopBtn;
     private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
-    private byte[] sound;
+    private short[] sound;
 
 
     @Override

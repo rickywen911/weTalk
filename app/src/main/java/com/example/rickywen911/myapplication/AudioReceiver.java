@@ -54,20 +54,20 @@ public class AudioReceiver implements Runnable {
 
     @Override
     public void run() {
-        isReceiving = true;
-        try {
-            while(isReceiving) {
-                datagramSocket.receive(datagramPacket);
-                //about to finish
-                if(datagramPacket.getLength() > 0) {
-                    Log.e(LOG_TAG,"data length=" + datagramPacket.getLength());
-                    AudioPlayer audioPlayer = new AudioPlayer(datagramPacket.getData(),datagramPacket.getLength());
-                    audioPlayer.execute();
-                }
-            }
-        } catch(IOException io) {
-            io.printStackTrace();
-        }
+//        isReceiving = true;
+//        try {
+//            while(isReceiving) {
+//                datagramSocket.receive(datagramPacket);
+//                //about to finish
+//                if(datagramPacket.getLength() > 0) {
+//                    Log.e(LOG_TAG,"data length=" + datagramPacket.getLength());
+//                    AudioPlayer audioPlayer = new AudioPlayer(datagramPacket.getData(),datagramPacket.getLength());
+//                    audioPlayer.execute();
+//                }
+//            }
+//        } catch(IOException io) {
+//            io.printStackTrace();
+//        }
         stopReceive();
         release();
     }

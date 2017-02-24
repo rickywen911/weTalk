@@ -53,13 +53,13 @@ public class AudioRecorder {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
-        a_data = new short[minBuffersize];
+        a_data = new short[1000000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
         Log.d(LOG_TAG,"start recording");
         if (isRecording) {
             audioRecord.startRecording();
-            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
+            int bufferRead = audioRecord.read(a_data,0,100000);
             Log.d(LOG_TAG,"bufferRead"+bufferRead);
         }
     }
@@ -88,8 +88,8 @@ public class AudioRecorder {
         }
     }
 
-    public byte[] getData() {
-        return this.s_data;
+    public short[] getData() {
+        return this.a_data;
     }
 
 
