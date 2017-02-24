@@ -18,7 +18,7 @@ import java.net.UnknownHostException;
  * Created by rickywen911 on 2/7/17.
  */
 
-public class AudioRecorder extends AsyncTask<Void,Void,Void> {
+public class AudioRecorder {
     public AudioRecorder audioRecorder;
     private AudioPlayer audioPlayer;
     DatagramSocket r_socket;
@@ -39,14 +39,10 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
     private InetAddress ip;
     private int port;
 
-    public AudioRecorder(byte[] s_data) {
-        this.s_data = s_data;
-    }
 
-
-    public AudioRecorder getInstance(byte[] s_data) {
+    public AudioRecorder getInstance() {
         if(audioRecorder == null) {
-            audioRecorder = new AudioRecorder(s_data);
+            audioRecorder = new AudioRecorder();
         }
         return audioRecorder;
     }
@@ -59,10 +55,21 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
         }
         a_data = new short[minBuffersize];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
+        this.isRecording = true;
+        Log.d(LOG_TAG,"start recording");
+        if (isRecording) {
+            audioRecord.startRecording();
+            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
+            Log.d(LOG_TAG,"bufferRead"+bufferRead);
+        }
     }
 
     public void stopRecording() {
         isRecording = false;
+        audioRecord.stop();
+        audioRecord.release();
+        Log.d(LOG_TAG,"stop recording");
+        this.audioRecord = null;
     }
 
 
@@ -81,18 +88,21 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
         }
     }
 
+    public byte[] getData() {
+        return this.s_data;
+    }
 
 
-    @Override
-    protected Void doInBackground(Void... params) {
-        startRecording();
-        this.isRecording = true;
+//    @Override
+//    protected Void doInBackground(Void... params) {
+//        startRecording();
+//        this.isRecording = true;
 //        initSender();
-        Log.d(LOG_TAG,"start recording");
-        if(isRecording) {
-            audioRecord.startRecording();
-            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
-            Log.d(LOG_TAG,"bufferRead" + bufferRead);
+//        Log.d(LOG_TAG,"start recording");
+//        if(isRecording) {
+//            audioRecord.startRecording();
+//            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
+//            Log.d(LOG_TAG,"bufferRead" + bufferRead);
 //            if(bufferRead > 0) {
 //
 //                Log.e(LOG_TAG,"sjdksdj");
@@ -106,11 +116,12 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
 //                    e.printStackTrace();
 //                }
 //            }
-        }
-        stopRecording();
-        audioRecord.stop();
-        audioRecord.release();
-        this.audioRecord = null;
-        return null;
-    }
+//        }
+//        stopRecording();
+//        audioRecord.stop();
+//        audioRecord.release();
+//        Log.d(LOG_TAG,"stop recording");
+//        this.audioRecord = null;
+//        return null;
+//    }
 }

@@ -18,6 +18,11 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/stop_record"
+        android:text="stop"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/play_btn"
         android:text="play"/>
 </LinearLayout>

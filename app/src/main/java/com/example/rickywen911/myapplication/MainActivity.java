@@ -10,6 +10,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button talkBtn;
     private Button playBtn;
+    private Button stopBtn;
     private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
     private byte[] sound;
@@ -21,13 +22,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         talkBtn = (Button) findViewById(R.id.speak_btn);
         playBtn = (Button) findViewById(R.id.play_btn);
-        audioRecorder = audioRecorder.getInstance(sound);
+        stopBtn = (Button) findViewById(R.id.stop_record);
 
-
+        audioRecorder = new AudioRecorder();
         talkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                audioRecorder.execute();
+                audioRecorder.startRecording();
+            }
+        });
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sound = audioRecorder.getData();
+                audioRecorder.stopRecording();
             }
         });
 
