@@ -30,7 +30,7 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
     public AudioPlayer(byte[] samples, int size) {
         this.samples = samples;
         this.size = size;
-        s_data = DataTrsansformUtil.toShortArray(samples);
+//        s_data = DataTrsansformUtil.toShortArray(samples);
     }
 
     private boolean initAudioTrack() {
@@ -52,7 +52,7 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
             Log.e(LOG_TAG,"init player error");
             return null;
         }
-        audioTrack.write(s_data,0,size);
+        audioTrack.write(samples,0,size);
         if(this.audioTrack != null) {
             if(this.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
                 this.audioTrack.stop();

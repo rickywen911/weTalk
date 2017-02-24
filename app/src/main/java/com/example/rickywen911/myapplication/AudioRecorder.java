@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 
 public class AudioRecorder extends AsyncTask<Void,Void,Void> {
     public AudioRecorder audioRecorder;
+    private AudioPlayer audioPlayer;
     DatagramSocket r_socket;
     DatagramPacket r_packet;
     public byte[] s_data;
@@ -38,12 +39,14 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
     private InetAddress ip;
     private int port;
 
+    public AudioRecorder(byte[] s_data) {
+        this.s_data = s_data;
+    }
 
 
-
-    public AudioRecorder getInstance() {
+    public AudioRecorder getInstance(byte[] s_data) {
         if(audioRecorder == null) {
-            audioRecorder = new AudioRecorder();
+            audioRecorder = new AudioRecorder(s_data);
         }
         return audioRecorder;
     }
@@ -84,24 +87,25 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
     protected Void doInBackground(Void... params) {
         startRecording();
         this.isRecording = true;
-        initSender();
+//        initSender();
         Log.d(LOG_TAG,"start recording");
         if(isRecording) {
             audioRecord.startRecording();
             int bufferRead = audioRecord.read(a_data,0,minBuffersize);
-            Log.e(LOG_TAG,"bufferRead" + bufferRead);
-            if(bufferRead > 0) {
-                Log.e(LOG_TAG,"sjdksdj");
-                s_data = DataTrsansformUtil.toByteArray(a_data);
-                try {
-                    Log.e(LOG_TAG,"try to sending");
-                    r_packet = new DatagramPacket(s_data,bufferRead,ip,port);
-                    r_packet.setData(s_data);
-                    r_socket.send(r_packet);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            Log.d(LOG_TAG,"bufferRead" + bufferRead);
+//            if(bufferRead > 0) {
+//
+//                Log.e(LOG_TAG,"sjdksdj");
+//                s_data = DataTrsansformUtil.toByteArray(a_data);
+//                try {
+//                    Log.e(LOG_TAG,"try to sending");
+//                    r_packet = new DatagramPacket(s_data,bufferRead,ip,port);
+//                    r_packet.setData(s_data);
+//                    r_socket.send(r_packet);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         stopRecording();
         audioRecord.stop();

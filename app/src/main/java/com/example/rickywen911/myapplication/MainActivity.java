@@ -9,8 +9,10 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
     private Button talkBtn;
-    private AudioReceiver audioReceiver;
+    private Button playBtn;
+    private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
+    private byte[] sound;
 
 
     @Override
@@ -18,17 +20,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         talkBtn = (Button) findViewById(R.id.speak_btn);
-        audioReceiver = new AudioReceiver();
-        audioReceiver.startReceive();
+        playBtn = (Button) findViewById(R.id.play_btn);
+        audioRecorder = audioRecorder.getInstance(sound);
 
 
-        audioRecorder = new AudioRecorder();
         talkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 audioRecorder.execute();
             }
         });
+
+
+
+
+        playBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                audioPlayer = new AudioPlayer(sound, sound.length);
+                audioPlayer.execute();
+            }
+        });
+
 
     }
 }
