@@ -53,6 +53,10 @@ public class AudioRecorder {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
+        final int frameSize = (sampleRate * (Short.SIZE / Byte.SIZE) / 2) & (Integer.MAX_VALUE - 1);
+        int bufferSize = (frameSize * 4);
+        if (bufferSize < minBuffersize)
+            bufferSize = minBuffersize;
         a_data = new short[1000000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
