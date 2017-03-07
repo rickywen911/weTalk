@@ -10,13 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.rickywen911.myapplication.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speak" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/speak_btn"
-        android:text="push"/>
+        android:text="talk"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/stop_record"
+        android:text="stop"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play_btn"
+        android:text="play"/>
 </LinearLayout>

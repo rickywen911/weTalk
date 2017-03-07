@@ -18,8 +18,9 @@ import java.net.UnknownHostException;
  * Created by rickywen911 on 2/7/17.
  */
 
-public class AudioRecorder extends AsyncTask<Void,Void,Void> {
+public class AudioRecorder {
     public AudioRecorder audioRecorder;
+    private AudioPlayer audioPlayer;
     DatagramSocket r_socket;
     DatagramPacket r_packet;
     public byte[] s_data;
@@ -39,8 +40,6 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
     private int port;
 
 
-
-
     public AudioRecorder getInstance() {
         if(audioRecorder == null) {
             audioRecorder = new AudioRecorder();
@@ -54,12 +53,27 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
-        a_data = new short[minBuffersize];
+        final int frameSize = (sampleRate * (Short.SIZE / Byte.SIZE) / 2) & (Integer.MAX_VALUE - 1);
+        int bufferSize = (frameSize * 4);
+        if (bufferSize < minBuffersize)
+            bufferSize = minBuffersize;
+        a_data = new short[1000000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
+        this.isRecording = true;
+        Log.d(LOG_TAG,"start recording");
+        if (isRecording) {
+            audioRecord.startRecording();
+            int bufferRead = audioRecord.read(a_data,0,100000);
+            Log.d(LOG_TAG,"bufferRead"+bufferRead);
+        }
     }
 
     public void stopRecording() {
         isRecording = false;
+        audioRecord.stop();
+        audioRecord.release();
+        Log.d(LOG_TAG,"stop recording");
+        this.audioRecord = null;
     }
 
 
@@ -78,35 +92,40 @@ public class AudioRecorder extends AsyncTask<Void,Void,Void> {
         }
     }
 
-
-
-    @Override
-    protected Void doInBackground(Void... params) {
-        startRecording();
-        this.isRecording = true;
-        initSender();
-        Log.d(LOG_TAG,"start recording");
-        if(isRecording) {
-            audioRecord.startRecording();
-            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
-            Log.e(LOG_TAG,"bufferRead" + bufferRead);
-            if(bufferRead > 0) {
-                Log.e(LOG_TAG,"sjdksdj");
-                s_data = DataTrsansformUtil.toByteArray(a_data);
-                try {
-                    Log.e(LOG_TAG,"try to sending");
-                    r_packet = new DatagramPacket(s_data,bufferRead,ip,port);
-                    r_packet.setData(s_data);
-                    r_socket.send(r_packet);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        stopRecording();
-        audioRecord.stop();
-        audioRecord.release();
-        this.audioRecord = null;
-        return null;
+    public short[] getData() {
+        return this.a_data;
     }
+
+
+//    @Override
+//    protected Void doInBackground(Void... params) {
+//        startRecording();
+//        this.isRecording = true;
+//        initSender();
+//        Log.d(LOG_TAG,"start recording");
+//        if(isRecording) {
+//            audioRecord.startRecording();
+//            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
+//            Log.d(LOG_TAG,"bufferRead" + bufferRead);
+//            if(bufferRead > 0) {
+//
+//                Log.e(LOG_TAG,"sjdksdj");
+//                s_data = DataTrsansformUtil.toByteArray(a_data);
+//                try {
+//                    Log.e(LOG_TAG,"try to sending");
+//                    r_packet = new DatagramPacket(s_data,bufferRead,ip,port);
+//                    r_packet.setData(s_data);
+//                    r_socket.send(r_packet);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        stopRecording();
+//        audioRecord.stop();
+//        audioRecord.release();
+//        Log.d(LOG_TAG,"stop recording");
+//        this.audioRecord = null;
+//        return null;
+//    }
 }

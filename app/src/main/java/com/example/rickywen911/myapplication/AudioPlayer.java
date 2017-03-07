@@ -21,16 +21,17 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
     private short[] s_data;
 
     private final int streamType = AudioManager.STREAM_MUSIC;
-    private final int sampleRate = 44100;
-    private final int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+    private final int sampleRate = 22050;
+    private final int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    private final int d_buffersize = 100000;
 
     private final int mode = AudioTrack.MODE_STREAM;
 
-    public AudioPlayer(byte[] samples, int size) {
-        this.samples = samples;
+    public AudioPlayer(short[] s_data, int size) {
+        this.s_data = s_data;
         this.size = size;
-        s_data = DataTrsansformUtil.toShortArray(samples);
+//        s_data = DataTrsansformUtil.toShortArray(samples);
     }
 
     private boolean initAudioTrack() {
@@ -40,7 +41,7 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
             Log.e(LOG_TAG,"init Aduio track error");
             return false;
         }
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,channelConfig,audioFormat,bufferSize,AudioTrack.MODE_STREAM);
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,channelConfig,audioFormat,d_buffersize,AudioTrack.MODE_STREAM);
         audioTrack.play();
         return true;
     }
