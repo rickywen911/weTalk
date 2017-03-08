@@ -24,7 +24,8 @@ public class AudioRecorder {
     DatagramSocket r_socket;
     DatagramPacket r_packet;
     public byte[] s_data;
-    public short[] a_data;
+    public short[] a_data_1;
+    public short[] a_data_2;
     private AudioRecord audioRecord;
     private String LOG_TAG = "AudioRecorder";
     private boolean isRecording = false;
@@ -57,14 +58,18 @@ public class AudioRecorder {
         int bufferSize = (frameSize * 4);
         if (bufferSize < minBuffersize)
             bufferSize = minBuffersize;
-        a_data = new short[1000000];
+        a_data_1 = new short[50000];
+        a_data_2 = new short[50000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
         Log.d(LOG_TAG,"start recording");
         if (isRecording) {
             audioRecord.startRecording();
-            int bufferRead = audioRecord.read(a_data,0,100000);
-            Log.d(LOG_TAG,"bufferRead"+bufferRead);
+            int bufferRead = audioRecord.read(a_data_1,0,a_data_1.length);
+            if(bufferRead == a_data_1.length) {
+                bufferRead = bufferRead + audioRecord.read(a_data_2,0,a_data_2.length);
+            }
+            Log.d(LOG_TAG,"bufferRead= " + bufferRead);
         }
     }
 
@@ -93,7 +98,7 @@ public class AudioRecorder {
     }
 
     public short[] getData() {
-        return this.a_data;
+        return this.a_data_1;
     }
 
 
