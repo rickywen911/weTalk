@@ -13,7 +13,8 @@ public class MainActivity extends AppCompatActivity {
     private Button stopBtn;
     private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
-    private short[] sound;
+    private short[] sound1;
+    private short[] sound2;
 
 
     @Override
@@ -34,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sound = audioRecorder.getData();
+                sound1 = audioRecorder.getData1();
+                sound2 = audioRecorder.getData2();
                 audioRecorder.stopRecording();
             }
         });
@@ -45,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                audioPlayer = new AudioPlayer(sound, sound.length);
+                audioPlayer = new AudioPlayer(sound1, sound1.length);
+                audioPlayer.execute();
+                audioPlayer = new AudioPlayer(sound2, sound2.length);
                 audioPlayer.execute();
             }
         });

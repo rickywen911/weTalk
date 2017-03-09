@@ -13,7 +13,7 @@ import java.net.DatagramSocket;
  * Created by rickywen911 on 2/7/17.
  */
 
-public class AudioPlayer extends AsyncTask<Void,Void,Void> {
+public class AudioPlayer extends AsyncTask<Void,Boolean,Void> {
     private AudioTrack audioTrack;
     private String LOG_TAG = "AudioPlayer";
     private int size;
@@ -41,7 +41,7 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
             Log.e(LOG_TAG,"init Aduio track error");
             return false;
         }
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,channelConfig,audioFormat,d_buffersize,AudioTrack.MODE_STREAM);
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,channelConfig,audioFormat,d_buffersize,mode);
         audioTrack.play();
         return true;
     }
@@ -62,4 +62,5 @@ public class AudioPlayer extends AsyncTask<Void,Void,Void> {
         }
         return null;
     }
+
 }
