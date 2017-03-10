@@ -6,6 +6,9 @@ import android.support.v7.widget.ButtonBarLayout;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button talkBtn;
@@ -15,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
     private AudioRecorder audioRecorder;
     private short[] sound1;
     private short[] sound2;
+
+    private Queue<short[]> playlist;
 
 
     @Override
@@ -26,17 +31,17 @@ public class MainActivity extends AppCompatActivity {
         stopBtn = (Button) findViewById(R.id.stop_record);
 
         audioRecorder = new AudioRecorder();
+        playlist = new LinkedList<>();
         talkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                audioRecorder.startRecording();
+
+                audioRecorder.startRecording(playlist);
             }
         });
         stopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sound1 = audioRecorder.getData1();
-                sound2 = audioRecorder.getData2();
                 audioRecorder.stopRecording();
             }
         });
@@ -47,9 +52,7 @@ public class MainActivity extends AppCompatActivity {
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                audioPlayer = new AudioPlayer(sound1, sound1.length);
-                audioPlayer.execute();
-                audioPlayer = new AudioPlayer(sound2, sound2.length);
+                audioPlayer = new AudioPlayer(playlist);
                 audioPlayer.execute();
             }
         });

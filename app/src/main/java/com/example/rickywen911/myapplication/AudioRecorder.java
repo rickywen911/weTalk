@@ -13,6 +13,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Created by rickywen911 on 2/7/17.
@@ -26,6 +28,7 @@ public class AudioRecorder {
     public byte[] s_data;
     public short[] a_data1;
     public short[] a_data2;
+
 
 
     private AudioRecord audioRecord;
@@ -50,7 +53,7 @@ public class AudioRecorder {
         return audioRecorder;
     }
 
-    public void startRecording() {
+    public void startRecording(final Queue<short[]> recordList) {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(LOG_TAG,"init recorder failed");
@@ -60,25 +63,34 @@ public class AudioRecorder {
         int bufferSize = (frameSize * 4);
         if (bufferSize < minBuffersize)
             bufferSize = minBuffersize;
-        a_data1 = new short[1000000];
+        a_data1 = new short[minBuffersize];
         a_data2 = new short[1000000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
         Log.d(LOG_TAG,"start recording");
-        if (isRecording) {
-            audioRecord.startRecording();
-            int bufferRead = audioRecord.read(a_data1,0,100000);
-            audioRecord.read(a_data2,0,100000);
-            Log.d(LOG_TAG,"bufferRead"+bufferRead);
-        }
+        audioRecord.startRecording();
+        new Thread() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+                while (isRecording) {
+                    int bufferRead = audioRecord.read(a_data1,0,minBuffersize);
+                    Log.e(LOG_TAG,"bufferRead" + bufferRead);
+                    if(bufferRead > 0) {
+                        recordList.add(a_data1);
+                        a_data1 = new short[minBuffersize];
+                    }
+                }
+                audioRecord.stop();
+                audioRecord.release();
+                audioRecord = null;
+            }
+        }.start();
     }
 
     public void stopRecording() {
-        isRecording = false;
-        audioRecord.stop();
-        audioRecord.release();
         Log.d(LOG_TAG,"stop recording");
-        this.audioRecord = null;
+        this.isRecording = false;
     }
 
 
@@ -97,6 +109,7 @@ public class AudioRecorder {
         }
     }
 
+
     public short[] getData1() {
         return this.a_data1;
     }
@@ -104,37 +117,4 @@ public class AudioRecorder {
     public short[] getData2() {
         return this.a_data2;
     }
-
-
-//    @Override
-//    protected Void doInBackground(Void... params) {
-//        startRecording();
-//        this.isRecording = true;
-//        initSender();
-//        Log.d(LOG_TAG,"start recording");
-//        if(isRecording) {
-//            audioRecord.startRecording();
-//            int bufferRead = audioRecord.read(a_data,0,minBuffersize);
-//            Log.d(LOG_TAG,"bufferRead" + bufferRead);
-//            if(bufferRead > 0) {
-//
-//                Log.e(LOG_TAG,"sjdksdj");
-//                s_data = DataTrsansformUtil.toByteArray(a_data);
-//                try {
-//                    Log.e(LOG_TAG,"try to sending");
-//                    r_packet = new DatagramPacket(s_data,bufferRead,ip,port);
-//                    r_packet.setData(s_data);
-//                    r_socket.send(r_packet);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//        stopRecording();
-//        audioRecord.stop();
-//        audioRecord.release();
-//        Log.d(LOG_TAG,"stop recording");
-//        this.audioRecord = null;
-//        return null;
-//    }
 }
