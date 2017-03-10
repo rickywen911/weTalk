@@ -64,7 +64,6 @@ public class AudioRecorder {
         if (bufferSize < minBuffersize)
             bufferSize = minBuffersize;
         a_data1 = new short[minBuffersize];
-        a_data2 = new short[1000000];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
         Log.d(LOG_TAG,"start recording");
