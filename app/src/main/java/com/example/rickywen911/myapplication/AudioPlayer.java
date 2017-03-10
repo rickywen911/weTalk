@@ -25,7 +25,7 @@ public class AudioPlayer extends AsyncTask<Void,Boolean,Void> {
     public Queue<short[]> playlist;
 
     private final int streamType = AudioManager.STREAM_MUSIC;
-    private final int sampleRate = 22050;
+    private final int sampleRate = 30000;
     private final int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 

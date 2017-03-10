@@ -3,6 +3,7 @@ package com.example.rickywen911.myapplication;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ButtonBarLayout;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -16,8 +17,6 @@ public class MainActivity extends AppCompatActivity {
     private Button stopBtn;
     private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
-    private short[] sound1;
-    private short[] sound2;
 
     private Queue<short[]> playlist;
 
@@ -28,25 +27,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         talkBtn = (Button) findViewById(R.id.speak_btn);
         playBtn = (Button) findViewById(R.id.play_btn);
-        stopBtn = (Button) findViewById(R.id.stop_record);
 
         audioRecorder = new AudioRecorder();
         playlist = new LinkedList<>();
-        talkBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                audioRecorder.startRecording(playlist);
+
+        talkBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                    {
+                        audioRecorder.startRecording(playlist);
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP:
+                    {
+                        audioRecorder.stopRecording();
+                        break;
+                    }
+                }
+                return false;
             }
         });
-        stopBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                audioRecorder.stopRecording();
-            }
-        });
-
-
 
 
         playBtn.setOnClickListener(new View.OnClickListener() {

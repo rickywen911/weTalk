@@ -14,15 +14,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/speak_btn"
-        android:text="talk"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/stop_record"
-        android:text="stop"/>
+        android:text="talk"
+        android:layout_weight="1"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/play_btn"
-        android:text="play"/>
+        android:text="play"
+        android:layout_weight="1"/>
 </LinearLayout>
