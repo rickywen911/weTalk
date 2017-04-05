@@ -3,8 +3,7 @@ package com.example.rickywen911.myapplication;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
+import android.os.Process;
 import android.util.Log;
 
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
 import java.util.Queue;
 
 /**
@@ -22,12 +20,10 @@ import java.util.Queue;
 
 public class AudioRecorder {
     public AudioRecorder audioRecorder;
-    private AudioPlayer audioPlayer;
-    DatagramSocket r_socket;
-    DatagramPacket r_packet;
+    private DatagramSocket s_socket;
+    private DatagramPacket r_packet;
     public byte[] s_data;
     public short[] a_data1;
-    public short[] a_data2;
 
 
 
@@ -71,13 +67,28 @@ public class AudioRecorder {
         new Thread() {
             @Override
             public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+                try{
+                    ip = InetAddress.getByName(DefaultConfig.SERVICE_HOST);
+                    s_socket = new DatagramSocket(DefaultConfig.send_port);
+                } catch (UnknownHostException ue) {
+                    ue.printStackTrace();
+                } catch (SocketException se) {
+                    se.printStackTrace();
+                }
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 while (isRecording) {
                     int bufferRead = audioRecord.read(a_data1,0,minBuffersize);
                     Log.e(LOG_TAG,"bufferRead" + bufferRead);
                     if(bufferRead > 0) {
-                        recordList.add(a_data1);
-                        a_data1 = new short[minBuffersize];
+                        try {
+                            s_data = DataTrsansformUtil.toByteArray(a_data1);
+                            r_packet = new DatagramPacket(s_data, s_data.length, ip, DefaultConfig.send_port);
+                            s_socket.send(r_packet);
+                            Log.d(LOG_TAG,"sending " + s_data.length + " bytes....");
+                            a_data1 = new short[minBuffersize];
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
                     }
                 }
                 audioRecord.stop();
@@ -90,30 +101,5 @@ public class AudioRecorder {
     public void stopRecording() {
         Log.d(LOG_TAG,"stop recording");
         this.isRecording = false;
-    }
-
-
-
-    public void initSender() {
-        try {
-            try {
-                ip = InetAddress.getByName(DefaultConfig.SERVICE_HOST);
-                this.port = DefaultConfig.receive_port;
-                r_socket = new DatagramSocket();
-            } catch (UnknownHostException ue) {
-                ue.printStackTrace();
-            }
-        } catch (SocketException se) {
-            se.printStackTrace();
-        }
-    }
-
-
-    public short[] getData1() {
-        return this.a_data1;
-    }
-
-    public short[] getData2() {
-        return this.a_data2;
     }
 }
