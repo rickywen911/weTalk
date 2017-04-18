@@ -12,7 +12,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Queue;
 
 /**
  * Created by rickywen911 on 2/7/17.
@@ -49,7 +48,7 @@ public class AudioRecorder {
         return audioRecorder;
     }
 
-    public void startRecording(final Queue<short[]> recordList) {
+    public void startRecording() {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(LOG_TAG,"init recorder failed");

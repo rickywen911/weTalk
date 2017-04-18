@@ -1,8 +1,7 @@
 package com.example.rickywen911.myapplication;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ButtonBarLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private Button stopBtn;
     private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
+    private AudioReceiver audioReceiver;
 
     private Queue<short[]> playlist;
 
@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
         audioRecorder = new AudioRecorder();
         playlist = new LinkedList<>();
+        audioReceiver = new AudioReceiver();
+        audioReceiver.startReceive(playlist);
 
 
         talkBtn.setOnTouchListener(new View.OnTouchListener() {
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                     {
-                        audioRecorder.startRecording(playlist);
+                        audioRecorder.startRecording();
                         break;
                     }
                     case MotionEvent.ACTION_UP:
@@ -59,7 +61,5 @@ public class MainActivity extends AppCompatActivity {
                 audioPlayer.execute();
             }
         });
-
-
     }
 }
