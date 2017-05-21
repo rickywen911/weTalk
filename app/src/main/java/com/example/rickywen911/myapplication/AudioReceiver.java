@@ -18,7 +18,6 @@ import java.util.Queue;
 public class AudioReceiver {
 
     private String LOG_TAG = "AduioReceiver";
-    private int port = DefaultConfig.receive_port;
     private DatagramSocket datagramSocket;
     private DatagramPacket datagramPacket;
     private boolean isReceiving = false;
@@ -32,9 +31,9 @@ public class AudioReceiver {
     private final int channeConfig = AudioFormat.CHANNEL_IN_MONO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 
-    public void startReceive(final Queue<short[]> receiveList) {
+    public void startReceive(final Queue<short[]> receiveList, int port) {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
-        packet_buffer = new byte[minBuffersize];
+        packet_buffer = new byte[minBuffersize*2];
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(LOG_TAG,"init recorder failed");
             return;
@@ -42,7 +41,7 @@ public class AudioReceiver {
         if(datagramSocket == null) {
             try {
                 datagramSocket = new DatagramSocket(port);
-                datagramPacket = new DatagramPacket(packet_buffer,minBuffersize);
+                datagramPacket = new DatagramPacket(packet_buffer,minBuffersize*2);
             } catch(SocketException se) {
                 se.printStackTrace();
             }
@@ -64,7 +63,7 @@ public class AudioReceiver {
                 }
                 release();
             }
-        };
+        }.start();
     }
 
     public void stopReceive() {
@@ -79,8 +78,11 @@ public class AudioReceiver {
 
         if(datagramSocket != null) {
             datagramSocket.close();
+            datagramSocket.disconnect();
             datagramSocket = null;
         }
+
+
 
         Log.v(LOG_TAG,"release completed");
     }

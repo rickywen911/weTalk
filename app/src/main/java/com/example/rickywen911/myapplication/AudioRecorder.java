@@ -48,16 +48,12 @@ public class AudioRecorder {
         return audioRecorder;
     }
 
-    public void startRecording() {
+    public void startRecording(final String ipAdrs, final int dport) {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
-        final int frameSize = (sampleRate * (Short.SIZE / Byte.SIZE) / 2) & (Integer.MAX_VALUE - 1);
-        int bufferSize = (frameSize * 4);
-        if (bufferSize < minBuffersize)
-            bufferSize = minBuffersize;
         a_data1 = new short[minBuffersize];
         audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
         this.isRecording = true;
@@ -67,8 +63,8 @@ public class AudioRecorder {
             @Override
             public void run() {
                 try{
-                    ip = InetAddress.getByName(DefaultConfig.SERVICE_HOST);
-                    s_socket = new DatagramSocket(DefaultConfig.send_port);
+                    ip = InetAddress.getByName(ipAdrs);
+                    s_socket = new DatagramSocket();
                 } catch (UnknownHostException ue) {
                     ue.printStackTrace();
                 } catch (SocketException se) {
@@ -81,7 +77,7 @@ public class AudioRecorder {
                     if(bufferRead > 0) {
                         try {
                             s_data = DataTrsansformUtil.toByteArray(a_data1);
-                            r_packet = new DatagramPacket(s_data, s_data.length, ip, DefaultConfig.send_port);
+                            r_packet = new DatagramPacket(s_data, s_data.length, ip, dport);
                             s_socket.send(r_packet);
                             Log.d(LOG_TAG,"sending " + s_data.length + " bytes....");
                             a_data1 = new short[minBuffersize];
@@ -92,6 +88,8 @@ public class AudioRecorder {
                 }
                 audioRecord.stop();
                 audioRecord.release();
+                s_socket.disconnect();
+                s_socket.close();
                 audioRecord = null;
             }
         }.start();

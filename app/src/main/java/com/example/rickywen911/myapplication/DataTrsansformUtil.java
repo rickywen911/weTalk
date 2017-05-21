@@ -1,28 +1,23 @@
 package com.example.rickywen911.myapplication;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /**
  * Created by rickywen911 on 2/8/17.
  */
 
 public class DataTrsansformUtil {
     public static short[] toShortArray(byte[] src) {
-
-        int count = src.length >> 1;
-        short[] dest = new short[count];
-        for (int i = 0; i < count; i++) {
-            dest[i] = (short) (src[i * 2] << 8 | src[2 * i + 1] & 0xff);
-        }
-        return dest;
+        short[] res = new short[src.length/2];
+        ByteBuffer.wrap(src).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(res);
+        return res;
     }
 
     public static byte[] toByteArray(short[] src) {
 
-        int count = src.length;
-        byte[] dest = new byte[count << 1];
-        for (int i = 0; i < count; i++) {
-            dest[i * 2] = (byte) (src[i] >> 8);
-            dest[i * 2 + 1] = (byte) (src[i] >> 0);
-        }
-        return dest;
+        byte[] res = new byte[src.length*2];
+        ByteBuffer.wrap(res).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(src);
+        return res;
     }
 }
