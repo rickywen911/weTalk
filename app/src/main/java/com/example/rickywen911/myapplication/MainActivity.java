@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 ip = ipText.getText().toString();
                 l_port = Integer.parseInt(localPortT.getText().toString());
                 s_port = Integer.parseInt(sourcePort.getText().toString());
-                audioReceiver.startReceive(playlist, l_port);
+                audioReceiver.startReceive(l_port);
                 Log.d(LOG_TAG, "dest ip is " + ip + "port is " + s_port);
             }
         });
@@ -80,15 +80,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 return false;
-            }
-        });
-
-
-        playBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                audioPlayer = new AudioPlayer(playlist);
-                audioPlayer.execute();
             }
         });
     }

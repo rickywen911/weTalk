@@ -31,7 +31,6 @@ public class AudioPlayer extends AsyncTask<Void,Boolean,Void> {
 
     public AudioPlayer(Queue<short[]> playlist) {
         this.playlist = playlist;
-//        s_data = DataTrsansformUtil.toShortArray(samples);
     }
 
     private boolean initAudioTrack() {
