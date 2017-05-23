@@ -19,32 +19,28 @@
             android:id="@+id/speak_btn"
             android:text="talk"
             android:layout_weight="1"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/play_btn"
-            android:text="play"
-            android:layout_weight="1"/>
     </LinearLayout>
 
     <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/ipAdrs"
-        android:hint="Please enter ip address"/>
-
-    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:hint="Please enter ip address"
+        android:text="192.168.49.1" />
+
+    <EditText
         android:id="@+id/lport"
-        android:hint="Please enter local port"/>
-
-    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:hint="Please enter local port"
+        android:text="8001" />
+
+    <EditText
         android:id="@+id/sPort"
-        android:hint="Please enter source port"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Please enter source port"
+        android:text="8000" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

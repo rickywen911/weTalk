@@ -14,8 +14,6 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity {
 
     private Button talkBtn;
-    private Button playBtn;
-    private Button stopBtn;
     private Button netBtn;
 
     private EditText ipText;
@@ -38,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         talkBtn = (Button) findViewById(R.id.speak_btn);
-        playBtn = (Button) findViewById(R.id.play_btn);
         netBtn = (Button) findViewById(R.id.network);
 
         ipText = (EditText) findViewById(R.id.ipAdrs);
@@ -57,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 ip = ipText.getText().toString();
                 l_port = Integer.parseInt(localPortT.getText().toString());
                 s_port = Integer.parseInt(sourcePort.getText().toString());
+                audioReceiver.stopReceive();
                 audioReceiver.startReceive(l_port);
                 Log.d(LOG_TAG, "dest ip is " + ip + "port is " + s_port);
             }

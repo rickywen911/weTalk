@@ -37,6 +37,7 @@ public class AudioReceiver {
     private final int playRate = 22050;
     private final int playConfig = AudioFormat.CHANNEL_OUT_STEREO;
     private final int mode = AudioTrack.MODE_STREAM;
+    private Thread receivingThread;
 
 
     public void startReceive(int port) {
@@ -46,12 +47,31 @@ public class AudioReceiver {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
+
+
         if(datagramSocket == null) {
             try {
                 datagramSocket = new DatagramSocket(port);
                 datagramPacket = new DatagramPacket(packet_buffer,minBuffersize*2);
+                Log.e(LOG_TAG,"A is" + datagramSocket.isClosed());
             } catch(SocketException se) {
+                Log.e(LOG_TAG,"A");
                 se.printStackTrace();
+                datagramSocket.close();
+                datagramSocket.disconnect();
+            }
+        } else {
+            datagramSocket.close();
+            datagramSocket.disconnect();
+            try {
+                datagramSocket = new DatagramSocket(port);
+                Log.e(LOG_TAG,"B is" + datagramSocket.isClosed());
+                datagramPacket = new DatagramPacket(packet_buffer,minBuffersize*2);
+            } catch(SocketException se) {
+                Log.e(LOG_TAG,"B");
+                se.printStackTrace();
+                datagramSocket.close();
+                datagramSocket.disconnect();
             }
         }
 
@@ -69,11 +89,15 @@ public class AudioReceiver {
             audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, playRate,playConfig,audioFormat,bufferSize,mode);
             audioTrack.play();
         }
-        new Thread() {
+        receivingThread= new Thread() {
             @Override
             public void run() {
                 isReceiving = true;
                 while(isReceiving) {
+                    if(receivingThread.currentThread().isInterrupted()){
+                        Log.d(LOG_TAG,"INTERRUPTTED!!!!!");
+                        return;
+                    }
                     try {
                             datagramSocket.receive(datagramPacket);
                             if(datagramPacket.getData() != null) {
@@ -82,17 +106,22 @@ public class AudioReceiver {
                                 audioTrack.write(s_data,0,s_data.length);
                             }
                     } catch(IOException ioe) {
+                        Log.e(LOG_TAG,"C");
                         ioe.printStackTrace();
                     }
                 }
-                release();
             }
-        }.start();
+        };
+        receivingThread.start();
     }
 
     public void stopReceive() {
         Log.v(LOG_TAG,"stop receiving");
         isReceiving = false;
+        if(receivingThread!=null) {
+            receivingThread.interrupt();
+            release();
+        }
     }
 
     private void release() {
