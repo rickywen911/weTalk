@@ -8,9 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 public class MainActivity extends AppCompatActivity {
 
     private Button talkBtn;
@@ -20,15 +17,16 @@ public class MainActivity extends AppCompatActivity {
     private EditText localPortT;
     private EditText sourcePort;
 
-    private AudioPlayer audioPlayer;
     private AudioRecorder audioRecorder;
     private AudioReceiver audioReceiver;
 
-    private Queue<short[]> playlist;
     private final String LOG_TAG = "main act";
     private String ip;
     private int l_port;
     private int s_port;
+
+
+    private SendingService service;
 
 
     @Override
@@ -42,11 +40,13 @@ public class MainActivity extends AppCompatActivity {
         localPortT = (EditText) findViewById(R.id.lport);
         sourcePort = (EditText) findViewById(R.id.sPort);
 
-
         audioRecorder = new AudioRecorder();
-        playlist = new LinkedList<>();
         audioReceiver = new AudioReceiver();
+        service = SendingService.getInstance();
 
+        service.execute();
+        audioReceiver.stopReceive();
+        audioReceiver.startReceive(8000);
 
         netBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,31 +54,37 @@ public class MainActivity extends AppCompatActivity {
                 ip = ipText.getText().toString();
                 l_port = Integer.parseInt(localPortT.getText().toString());
                 s_port = Integer.parseInt(sourcePort.getText().toString());
-                audioReceiver.stopReceive();
-                audioReceiver.startReceive(l_port);
+                service.addThread(new SenderThread(ip,s_port));
+
                 Log.d(LOG_TAG, "dest ip is " + ip + "port is " + s_port);
             }
         });
 
 
 
+
         talkBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                    {
-                        audioRecorder.startRecording(ip, s_port);
-                        break;
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            audioRecorder.startRecording();
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            audioRecorder.stopRecording();
+                            break;
+                        }
                     }
-                    case MotionEvent.ACTION_UP:
-                    {
-                        audioRecorder.stopRecording();
-                        break;
-                    }
+                    return false;
                 }
-                return false;
-            }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        audioReceiver.stopReceive();
+        service.stopAll();
     }
 }

@@ -24,10 +24,12 @@ public class AudioReceiver {
     private DatagramSocket datagramSocket;
     private DatagramPacket datagramPacket;
     private boolean isReceiving = false;
+    public boolean isPlaying = false;
 
     private byte[] packet_buffer;
     private int minBuffersize;
     private short[] s_data;
+
 
     private final int audioSource = MediaRecorder.AudioSource.MIC;
     private final int sampleRate = 44100;
@@ -105,6 +107,7 @@ public class AudioReceiver {
                                 //receiveList.add(s_data);
                                 audioTrack.write(s_data,0,s_data.length);
                             }
+                            isPlaying = false;
                     } catch(IOException ioe) {
                         Log.e(LOG_TAG,"C");
                         ioe.printStackTrace();

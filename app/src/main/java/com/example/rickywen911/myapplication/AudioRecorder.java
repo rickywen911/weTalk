@@ -6,12 +6,7 @@ import android.media.MediaRecorder;
 import android.os.Process;
 import android.util.Log;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 /**
  * Created by rickywen911 on 2/7/17.
@@ -19,8 +14,6 @@ import java.net.UnknownHostException;
 
 public class AudioRecorder {
     public AudioRecorder audioRecorder;
-    private DatagramSocket s_socket;
-    private DatagramPacket r_packet;
     public byte[] s_data;
     public short[] a_data1;
 
@@ -48,7 +41,7 @@ public class AudioRecorder {
         return audioRecorder;
     }
 
-    public void startRecording(final String ipAdrs, final int dport) {
+    public void startRecording() {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(LOG_TAG,"init recorder failed");
@@ -62,34 +55,18 @@ public class AudioRecorder {
         new Thread() {
             @Override
             public void run() {
-                try{
-                    ip = InetAddress.getByName(ipAdrs);
-                    s_socket = new DatagramSocket();
-                } catch (UnknownHostException ue) {
-                    ue.printStackTrace();
-                } catch (SocketException se) {
-                    se.printStackTrace();
-                }
                 Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 while (isRecording) {
                     int bufferRead = audioRecord.read(a_data1,0,minBuffersize);
                     Log.e(LOG_TAG,"bufferRead" + bufferRead);
                     if(bufferRead > 0) {
-                        try {
                             s_data = DataTrsansformUtil.toByteArray(a_data1);
-                            r_packet = new DatagramPacket(s_data, s_data.length, ip, dport);
-                            s_socket.send(r_packet);
-                            Log.d(LOG_TAG,"sending " + s_data.length + " bytes....");
+                            SendingService.getInstance().newVoiceByte(s_data);
                             a_data1 = new short[minBuffersize];
-                        } catch (IOException ie) {
-                            ie.printStackTrace();
                         }
-                    }
                 }
                 audioRecord.stop();
                 audioRecord.release();
-                s_socket.disconnect();
-                s_socket.close();
                 audioRecord = null;
             }
         }.start();
