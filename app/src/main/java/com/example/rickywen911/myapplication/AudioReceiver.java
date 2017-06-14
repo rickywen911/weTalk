@@ -32,21 +32,24 @@ public class AudioReceiver {
 
 
     private final int audioSource = MediaRecorder.AudioSource.MIC;
-    private final int sampleRate = 44100;
     private final int channeConfig = AudioFormat.CHANNEL_IN_MONO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     private final int streamType = AudioManager.STREAM_MUSIC;
-    private final int playRate = 22050;
-    private final int playConfig = AudioFormat.CHANNEL_OUT_STEREO;
+    private final int playRate = 8000;
+    private final int playConfig = AudioFormat.CHANNEL_OUT_MONO;
     private final int mode = AudioTrack.MODE_STREAM;
+    private final int sampleRate = 8000;
+    private final int sampleInterval = 20;
+    private final int sampleSize = 2;
+    private final int bufSize = sampleInterval*sampleInterval*sampleSize*2;
     private Thread receivingThread;
 
 
     public void startReceive(int port) {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
-        packet_buffer = new byte[minBuffersize*2];
+        packet_buffer = new byte[bufSize];
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
-            Log.e(LOG_TAG,"init recorder failed");
+            Log.e(LOG_TAG,"init recceiver failed");
             return;
         }
 
@@ -54,7 +57,7 @@ public class AudioReceiver {
         if(datagramSocket == null) {
             try {
                 datagramSocket = new DatagramSocket(port);
-                datagramPacket = new DatagramPacket(packet_buffer,minBuffersize*2);
+                datagramPacket = new DatagramPacket(packet_buffer,bufSize);
                 Log.e(LOG_TAG,"A is" + datagramSocket.isClosed());
             } catch(SocketException se) {
                 Log.e(LOG_TAG,"A");
@@ -68,7 +71,7 @@ public class AudioReceiver {
             try {
                 datagramSocket = new DatagramSocket(port);
                 Log.e(LOG_TAG,"B is" + datagramSocket.isClosed());
-                datagramPacket = new DatagramPacket(packet_buffer,minBuffersize*2);
+                datagramPacket = new DatagramPacket(packet_buffer,bufSize);
             } catch(SocketException se) {
                 Log.e(LOG_TAG,"B");
                 se.printStackTrace();
@@ -88,7 +91,7 @@ public class AudioReceiver {
             if(bufferSize < 0) {
                 Log.e(LOG_TAG,"init Aduio track error");
             }
-            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, playRate,playConfig,audioFormat,bufferSize,mode);
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, playRate,playConfig,audioFormat,bufSize,mode);
             audioTrack.play();
         }
         receivingThread= new Thread() {
@@ -103,9 +106,10 @@ public class AudioReceiver {
                     try {
                             datagramSocket.receive(datagramPacket);
                             if(datagramPacket.getData() != null) {
-                                s_data = DataTrsansformUtil.toShortArray(datagramPacket.getData());
+
+                                //s_data = DataTrsansformUtil.toShortArray(datagramPacket.getData());
                                 //receiveList.add(s_data);
-                                audioTrack.write(s_data,0,s_data.length);
+                                audioTrack.write(datagramPacket.getData(),0,bufSize);
                             }
                             isPlaying = false;
                     } catch(IOException ioe) {

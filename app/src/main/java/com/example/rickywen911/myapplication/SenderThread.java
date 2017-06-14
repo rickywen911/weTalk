@@ -68,9 +68,10 @@ public class SenderThread implements Callable<Boolean>{
             if(!voicePacketQueue.isEmpty()) {
                 try {
                     audioData = voicePacketQueue.remove();
-                    r_packet = new DatagramPacket(audioData, audioData.length, ip, port);
+                    r_packet = new DatagramPacket(audioData, SendingService.length, ip, port);
+
                     s_socket.send(r_packet);
-                    Log.d(LOG_TAG, "sending " + audioData.length + " bytes...");
+                    Log.d(LOG_TAG, "sending " + SendingService.length + " bytes...");
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }

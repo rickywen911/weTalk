@@ -23,6 +23,8 @@ public class SendingService extends AsyncTask<Void,Void,Void> {
 
     private boolean sendServiceEnable = false;
 
+    public static int length = 0;
+
 
     public static SendingService getInstance(){
         if(sendingServiceInstance==null){
@@ -76,7 +78,8 @@ public class SendingService extends AsyncTask<Void,Void,Void> {
         return true;
     }
 
-    public void newVoiceByte(byte[] voiceByte){
+    public void newVoiceByte(byte[] voiceByte,int length){
+        this.length = length;
         for(SenderThread s: threadList){
             s.getQueue().add(voiceByte);
         }

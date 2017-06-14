@@ -26,7 +26,10 @@ public class AudioRecorder {
     private int minBuffersize;
 
     private final int audioSource = MediaRecorder.AudioSource.MIC;
-    private final int sampleRate = 44100;
+    private final int sampleRate = 8000;
+    private final int sampleInterval = 20;
+    private final int sampleSize = 2;
+    private final int bufSize = sampleInterval*sampleInterval*sampleSize*2;
     private final int channeConfig = AudioFormat.CHANNEL_IN_MONO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 
@@ -47,22 +50,22 @@ public class AudioRecorder {
             Log.e(LOG_TAG,"init recorder failed");
             return;
         }
-        a_data1 = new short[minBuffersize];
-        audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize);
+        s_data = new byte[bufSize];
+        audioRecord = new AudioRecord(audioSource,sampleRate,channeConfig,audioFormat,minBuffersize*10);
         this.isRecording = true;
         Log.d(LOG_TAG,"start recording");
-        audioRecord.startRecording();
+
         new Thread() {
             @Override
             public void run() {
+                audioRecord.startRecording();
                 Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 while (isRecording) {
-                    int bufferRead = audioRecord.read(a_data1,0,minBuffersize);
+                    int bufferRead = audioRecord.read(s_data,0,bufSize);
                     Log.e(LOG_TAG,"bufferRead" + bufferRead);
                     if(bufferRead > 0) {
-                            s_data = DataTrsansformUtil.toByteArray(a_data1);
-                            SendingService.getInstance().newVoiceByte(s_data);
-                            a_data1 = new short[minBuffersize];
+                            SendingService.getInstance().newVoiceByte(s_data,bufferRead);
+                            //a_data1 = new short[minBuffersize];
                         }
                 }
                 audioRecord.stop();
