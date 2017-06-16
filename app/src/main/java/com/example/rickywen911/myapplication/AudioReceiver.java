@@ -10,6 +10,9 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
 import java.net.SocketException;
 
 /**
@@ -23,8 +26,10 @@ public class AudioReceiver {
     private String LOG_TAG = "AduioReceiver";
     private DatagramSocket datagramSocket;
     private DatagramPacket datagramPacket;
+    private MulticastSocket multicastSocket;
     private boolean isReceiving = false;
-    public boolean isPlaying = false;
+    private boolean isPlaying = false;
+    private InetAddress ip;
 
     private byte[] packet_buffer;
     private int minBuffersize;
@@ -44,8 +49,84 @@ public class AudioReceiver {
     private final int bufSize = sampleInterval*sampleInterval*sampleSize*2;
     private Thread receivingThread;
 
+    public void startMultiReceive(String ipAdrs,int port) {
+        minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
+        packet_buffer = new byte[bufSize];
+        if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
+            Log.e(LOG_TAG,"init recceiver failed");
+            return;
+        }
 
-    public void startReceive(int port) {
+        if(multicastSocket == null) {
+            try {
+                ip = InetAddress.getByName(ipAdrs);
+                multicastSocket = new MulticastSocket(port);
+                multicastSocket.setSoTimeout(0);
+                multicastSocket.joinGroup(new InetSocketAddress(ip,port), Util.getNetworkAdapter());
+                datagramPacket = new DatagramPacket(packet_buffer,bufSize);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                multicastSocket.close();
+                multicastSocket.disconnect();
+            }
+        } else {
+            multicastSocket.close();
+            multicastSocket.disconnect();
+            try {
+                ip = InetAddress.getByName(ipAdrs);
+                multicastSocket = new MulticastSocket(port);
+                multicastSocket.setSoTimeout(0);
+                multicastSocket.joinGroup(new InetSocketAddress(ip,port), Util.getNetworkAdapter());
+                datagramPacket = new DatagramPacket(packet_buffer,bufSize);
+            } catch (IOException e) {
+                e.printStackTrace();
+                multicastSocket.close();
+                multicastSocket.disconnect();
+            }
+        }
+        if(this.audioTrack != null) {
+            if(this.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                this.audioTrack.stop();
+                this.audioTrack.release();
+            }
+        } else {
+            int bufferSize = AudioRecord.getMinBufferSize(playRate,playConfig,audioFormat);
+            Log.e(LOG_TAG,"bufferSize" + bufferSize);
+            if(bufferSize < 0) {
+                Log.e(LOG_TAG,"init Aduio track error");
+            }
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, playRate,playConfig,audioFormat,bufSize,mode);
+            audioTrack.play();
+        }
+
+        receivingThread= new Thread() {
+            @Override
+            public void run() {
+                isReceiving = true;
+                while(isReceiving) {
+                    if(receivingThread.currentThread().isInterrupted()){
+                        Log.d(LOG_TAG,"INTERRUPTTED!!!!!");
+                        return;
+                    }
+                    try {
+                        multicastSocket.receive(datagramPacket);
+                        if(datagramPacket.getData() != null) {
+                            audioTrack.write(datagramPacket.getData(),0,bufSize);
+                        }
+                        isPlaying = false;
+                    } catch(IOException ioe) {
+                        Log.e(LOG_TAG,"C");
+                        ioe.printStackTrace();
+                    }
+                }
+            }
+        };
+        receivingThread.start();
+    }
+
+    public void startSingleReceive(int port) {
         minBuffersize = AudioRecord.getMinBufferSize(sampleRate,channeConfig,audioFormat);
         packet_buffer = new byte[bufSize];
         if(minBuffersize == AudioRecord.ERROR || minBuffersize == AudioRecord.ERROR_BAD_VALUE) {
@@ -106,9 +187,6 @@ public class AudioReceiver {
                     try {
                             datagramSocket.receive(datagramPacket);
                             if(datagramPacket.getData() != null) {
-
-                                //s_data = DataTrsansformUtil.toShortArray(datagramPacket.getData());
-                                //receiveList.add(s_data);
                                 audioTrack.write(datagramPacket.getData(),0,bufSize);
                             }
                             isPlaying = false;
@@ -151,5 +229,26 @@ public class AudioReceiver {
         }
 
         Log.v(LOG_TAG,"release completed");
+    }
+
+
+    public boolean leaveGroup() {
+        if(ip == null) {
+            return true;
+        } else if(multicastSocket != null){
+            try {
+                multicastSocket.leaveGroup(ip);
+                multicastSocket.close();
+                multicastSocket.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public MulticastSocket getMulticastSocket() {
+        return this.multicastSocket;
     }
 }
